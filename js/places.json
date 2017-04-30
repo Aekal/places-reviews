@@ -1,0 +1,29 @@
+﻿{
+  "dominos": [
+    {
+      "lat": 38.9658157,
+      "lng": -84.6743774,
+      "placeId": "ChIJoU6wE7zGQYgRJNDXqvgDTIQ"
+    },
+    {
+      "lat": 36.0602014,
+      "lng": -88.1158447,
+      "placeId": "ChIJBYbxUWd3e4gRHM4e6yfDgZM"
+    },
+    {
+      "lat": 34.0958849,
+      "lng": -86.8016052,
+      "placeId": "ChIJa3Fr5D22iYgRKCCCMkdcROY"
+    },
+    {
+      "lat": 35.3722548,
+      "lng": -80.1974487,
+      "placeId": "ChIJ7-pTcmV7VIgRPTsbDKnImn8"
+    },
+    {
+      "lat": 36.1012669,
+      "lng": -78.4657288,
+      "placeId": "ChIJhVQx4nqyrYkRVHeXy8CbcmY"
+    }
+  ]
+}
