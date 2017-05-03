@@ -5,8 +5,7 @@ $(function() {
 	$.getJSON("js/places.json", function(data) {
 		var avgLat = 0,
 				avgLng = 0,
-				mapPos = 0,
-				markerPosArray = [];
+				mapPos = 0;
 		//Set markers position
 		for (var i = 0; i < data.dominos.length; i++) {
 			avgLat += data.dominos[i].lat;
@@ -16,7 +15,7 @@ $(function() {
 		mapPos = {
 			lat: avgLat/data.dominos.length,
 			lng: avgLng/data.dominos.length
-		}
+		};
 		initMap(mapPos, data.dominos);
 	});
 });
@@ -44,7 +43,7 @@ function initMap(mapPos, dominos) {
 		var markerPos = {
 			lat: data.lat,
 			lng: data.lng
-		}
+		};
 		var marker = new google.maps.Marker({
 			position: markerPos,
 			map: map
@@ -55,43 +54,63 @@ function initMap(mapPos, dominos) {
 			service.getDetails(request, function(place, status) {
 				showReviews(place);
 			});
-		})
+		});
 	}
 	createMap(mapPos);
 	for (var i = 0; i < dominos.length; i++) {
 		createMarker(dominos[i]);
-	};
+	}
 }
 
 function showReviews (place) {
+	var $review, $author, $authorName, $authorPhoto,
+	$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
+	reviewRating, $star, $starEmpty, $reviewStars;
+
 	var $reviews = $(".reviews");
 	$reviews.empty();
-	console.log(place);
-	for (var i = 0; i < place.reviews.length; i++) {
-		var review, author, authorName, authorPhoto, reviewDate, reviewText, reviewItems, reviewRating, star, starEmpty, reviewStars;
-		review = $("<div class='review'></div>");
-		author = $("<div class='author'></div>");
-		authorName = $("<p class='author-name'>" + place.reviews[i].author_name + "</p>");
-		authorPhoto = $("<img class='author-photo' src=" + place.reviews[i].profile_photo_url + "></img>");
-		author.append([authorPhoto, authorName]);
 
+	for (var i = 0; i < place.reviews.length; i++) {
+		$review = $("<div class='review'></div>");
+		//Author info
+		$author = $("<div class='author'></div>");
+		$authorName = $("<p class='author-name'>" + place.reviews[i].author_name + "</p>");
+		$authorPhoto = $("<img class='author-photo' src=" + place.reviews[i].profile_photo_url + "></img>");
+		$author.append([$authorPhoto, $authorName]);
+		//Star ratings
 		reviewRating = place.reviews[i].rating;
-		reviewStars = $("<div class='review-stars'></div>");
+		$reviewStars = $("<div class='review-stars'></div>");
 		//Create bootstrap star icons
 		for (var j = 0; j < place.reviews.length; j++) {
 			if (j < reviewRating) {
-				star = $("<span class='glyphicon glyphicon-star' aria-hidden='true'></span>");
-				reviewStars.append(star);
+				$star = $("<span class='glyphicon glyphicon-star' aria-hidden='true'></span>");
+				$reviewStars.append($star);
 			} else {
-				starEmpty = $("<span class='glyphicon glyphicon-star-empty' aria-hidden='true'></span>");
-				reviewStars.append(starEmpty);
+				$starEmpty = $("<span class='glyphicon glyphicon-star-empty' aria-hidden='true'></span>");
+				$reviewStars.append($starEmpty);
 			}
 		}
+		$reviewDate = $("<p class='review-date'>" + place.reviews[i].relative_time_description + "</p>");
+		//Shorten visible text and add button to expand
+		if (place.reviews[i].text.length > 230) {
+			shortText = place.reviews[i].text.substr(0, 230) + "...";
+			$readMore = $("<a href=" + i + "> read more</a>");
+			$reviewText = $("<p class='review-text'>" + shortText + "</p>").append($readMore);
+		} else {
+			$reviewText = $("<p class='review-text'>" + place.reviews[i].text + "</p>");
+		}
 
-		reviewText = $("<p class='review-text'>" + place.reviews[i].text + "</p>");
-		reviewDate = $("<p class='review-date'>"+ place.reviews[i].relative_time_description +"</p>");
-
-		reviewItems = [author, reviewDate, reviewStars, reviewText];
-		review.append(reviewItems).appendTo($reviews);
+		//Put review components to one array
+		$reviewItems = [$author, $reviewDate, $reviewStars, $reviewText];
+		$review.append($reviewItems).appendTo($reviews);
 	}
+
+	//Expand text by clicking on the button
+	$(".review-text a").on("click", function(e) {
+		e.preventDefault();
+		var $this = $(this);
+		var i = $(this).attr("href");
+		shortText = place.reviews[i].text;
+		$this.parent().text(shortText);
+	});
 }
