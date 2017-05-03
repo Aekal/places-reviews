@@ -1,37 +1,28 @@
-var map;
+var map, service;
 
 $(function() {
 	//Get places info from json file
 	$.getJSON("js/places.json", function(data) {
-		var avgLat, avgLng, mapPos, markerPos, markerPosArray;
+		var avgLat, avgLng, mapPos, markerPosArray;
 		mapPos = 0;
 		avgLat = 0;
 		avgLng = 0;
 		markerPosArray = [];
 		//Set markers position
 		for (var i = 0; i < data.dominos.length; i++) {
-			markerPos = {
-				lat: data.dominos[i].lat,
-				lng: data.dominos[i].lng
-			}
-			markerPosArray.push(markerPos);
-			avgLat += markerPos.lat;
-			avgLng += markerPos.lng;
+			avgLat += data.dominos[i].lat;
+			avgLng += data.dominos[i].lng;
 		}
 		//Set average position for center map
 		mapPos = {
 			lat: avgLat/data.dominos.length,
 			lng: avgLng/data.dominos.length
 		}
-		initMap(mapPos, markerPosArray);
+		initMap(mapPos, data.dominos);
 	});
 });
 
-function initMap(mapPos, markerPosArray) {
-	createMap(mapPos);
-	for (var i = 0; i < markerPosArray.length; i++) {
-		createMarker(markerPosArray[i]);
-	};
+function initMap(mapPos, dominos) {
 	var styles = [
 		{
 			featureType: "road",
@@ -50,10 +41,35 @@ function initMap(mapPos, markerPosArray) {
 			styles: styles
 		});
 	}
-	function createMarker (markerPos) {
-		new google.maps.Marker({
+	function createMarker (data) {
+		var markerPos = {
+			lat: data.lat,
+			lng: data.lng
+		}
+		var marker = new google.maps.Marker({
 			position: markerPos,
 			map: map
 		});
+		marker.addListener("click", function() {
+			service = new google.maps.places.PlacesService(map);
+			var request = {placeId: data.placeId}
+			service.getDetails(request, function(place, status) {
+				showReviews(place);
+			});
+		})
+	}
+	createMap(mapPos);
+	for (var i = 0; i < dominos.length; i++) {
+		createMarker(dominos[i]);
+	};
+}
+
+function showReviews (place) {
+	var $reviews = $(".reviews");
+	$reviews.empty();
+	console.log(place);
+	for (var i = 0; i < place.reviews.length; i++) {
+		var text = "<p>" + place.reviews[i].text + "</p>";
+		$reviews.append(text);
 	}
 }
