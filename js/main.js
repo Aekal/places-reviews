@@ -3,11 +3,10 @@ var map, service;
 $(function() {
 	//Get places info from json file
 	$.getJSON("js/places.json", function(data) {
-		var avgLat, avgLng, mapPos, markerPosArray;
-		mapPos = 0;
-		avgLat = 0;
-		avgLng = 0;
-		markerPosArray = [];
+		var avgLat = 0,
+				avgLng = 0,
+				mapPos = 0,
+				markerPosArray = [];
 		//Set markers position
 		for (var i = 0; i < data.dominos.length; i++) {
 			avgLat += data.dominos[i].lat;
@@ -52,7 +51,7 @@ function initMap(mapPos, dominos) {
 		});
 		marker.addListener("click", function() {
 			service = new google.maps.places.PlacesService(map);
-			var request = {placeId: data.placeId}
+			var request = {placeId: data.placeId};
 			service.getDetails(request, function(place, status) {
 				showReviews(place);
 			});
@@ -69,7 +68,30 @@ function showReviews (place) {
 	$reviews.empty();
 	console.log(place);
 	for (var i = 0; i < place.reviews.length; i++) {
-		var text = "<p>" + place.reviews[i].text + "</p>";
-		$reviews.append(text);
+		var review, author, authorName, authorPhoto, reviewDate, reviewText, reviewItems, reviewRating, star, starEmpty, reviewStars;
+		review = $("<div class='review'></div>");
+		author = $("<div class='author'></div>");
+		authorName = $("<p class='author-name'>" + place.reviews[i].author_name + "</p>");
+		authorPhoto = $("<img class='author-photo' src=" + place.reviews[i].profile_photo_url + "></img>");
+		author.append([authorPhoto, authorName]);
+
+		reviewRating = place.reviews[i].rating;
+		reviewStars = $("<div class='review-stars'></div>");
+		//Create bootstrap star icons
+		for (var j = 0; j < place.reviews.length; j++) {
+			if (j < reviewRating) {
+				star = $("<span class='glyphicon glyphicon-star' aria-hidden='true'></span>");
+				reviewStars.append(star);
+			} else {
+				starEmpty = $("<span class='glyphicon glyphicon-star-empty' aria-hidden='true'></span>");
+				reviewStars.append(starEmpty);
+			}
+		}
+
+		reviewText = $("<p class='review-text'>" + place.reviews[i].text + "</p>");
+		reviewDate = $("<p class='review-date'>"+ place.reviews[i].relative_time_description +"</p>");
+
+		reviewItems = [author, reviewDate, reviewStars, reviewText];
+		review.append(reviewItems).appendTo($reviews);
 	}
 }

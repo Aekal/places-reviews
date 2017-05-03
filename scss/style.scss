@@ -3,5 +3,49 @@
 }
 
 .reviews {
-	border: 1px solid #215b74;
+	box-shadow: 2px 2px 20px #888888;
+	border-radius: 10px;
+	max-height: 80vh;
+	overflow-x: hidden;
+
+	.review {
+		margin: 10px 0;
+		border-bottom: 1px dashed #a2a2a2;
+
+		&:last-child {
+			border: 0;
+		}
+	}
+
+	.author {
+		position: relative;
+	}
+
+	.author-name {
+		font-size: 16px;
+		width: 100%;
+		text-align: center;
+		position: absolute;
+		top: 7px;
+	}
+
+	.author-photo {
+		width: 40px;
+		height: 40px;
+		margin-left: 5px;
+	}
+
+	.review-date {
+		margin-bottom: 2px;
+		color: #a4a4a4;
+		text-align: center;
+	}
+
+	.review-text {
+
+	}
+
+	.review-stars {
+		text-align: center;
+	}
 }
