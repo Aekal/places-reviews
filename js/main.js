@@ -1,4 +1,4 @@
-var map, service;
+var map, service, infoWindow;
 
 $(function() {
 	//Get places info from json file
@@ -40,18 +40,23 @@ function initMap(mapPos, dominos) {
 		});
 	}
 	function createMarker (data) {
-		var markerPos = {
+		var marker, markerPos, request;
+		markerPos = {
 			lat: data.lat,
 			lng: data.lng
 		};
-		var marker = new google.maps.Marker({
+		marker = new google.maps.Marker({
 			position: markerPos,
-			map: map
+			map: map,
+			icon: "img/dominos-icon.png"
 		});
+		request = {
+			placeId: data.placeId
+		};
 		marker.addListener("click", function() {
 			service = new google.maps.places.PlacesService(map);
-			var request = {placeId: data.placeId};
 			service.getDetails(request, function(place, status) {
+				showInfoWindow(place, marker);
 				showReviews(place);
 			});
 		});
@@ -63,6 +68,7 @@ function initMap(mapPos, dominos) {
 }
 
 function showReviews (place) {
+	console.log(place);
 	var $review, $author, $authorName, $authorPhoto,
 	$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
 	reviewRating, $star, $starEmpty, $reviewStars;
@@ -113,4 +119,15 @@ function showReviews (place) {
 		shortText = place.reviews[i].text;
 		$this.parent().text(shortText);
 	});
+}
+
+function showInfoWindow (place, marker) {
+	var contentText = "<p class='place-name'>" + place.name + "</p>" + "<p class='place-adress'>" + place.formatted_address + "</p>";
+	if (infoWindow) {
+		infoWindow.close();
+	}
+	infoWindow = new google.maps.InfoWindow({
+		content: contentText
+	});
+	infoWindow.open(map, marker);
 }
