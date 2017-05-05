@@ -1,37 +1,26 @@
-var map, service, infoWindow, iterator;
-
 $(function() {
-	//Get places info from json file
-	$.getJSON("js/places.json", function(data) {
-		var avgLat = 0,
-				avgLng = 0,
-				mapPos = 0;
-		//Set markers position
-		for (var i = 0; i < data.dominos.length; i++) {
-			avgLat += data.dominos[i].lat;
-			avgLng += data.dominos[i].lng;
+	var map, service, infoWindow, iterator;
+	function initMap(mapPos, dominos) {
+		createMap(mapPos);
+		//Create markers with drop animation
+		for (var i = 0; i < dominos.length; i++) {
+			iterator = 0;
+			window.setTimeout(function() {
+				createMarker(dominos);
+			}, i*400);
 		}
-		//Set average position for center map
-		mapPos = {
-			lat: avgLat/data.dominos.length,
-			lng: avgLng/data.dominos.length
-		};
-		initMap(mapPos, data.dominos);
-	});
-});
-
-function initMap(mapPos, dominos) {
-	var styles = [
-		{
-			featureType: "road",
-			elementType: "geometry",
-			stylers: [
-				{ lightness: -30 },
-				{ visibility: "simplified" }
-			]
-		}
-	];
+	}
 	function createMap (mapPos) {
+		var styles = [
+			{
+				featureType: "road",
+				elementType: "geometry",
+				stylers: [
+					{ lightness: -30 },
+					{ visibility: "simplified" }
+				]
+			}
+		];
 		map = new google.maps.Map(document.getElementById("map"), {
 			center: mapPos,
 			zoom: 5,
@@ -40,8 +29,8 @@ function initMap(mapPos, dominos) {
 		});
 	}
 	function createMarker (data) {
-		var loc = data[iterator++];
-		var marker, markerPos, request, markerList = [];
+		var marker, markerPos, request, markerList = [], loc;
+		loc = data[iterator++];
 		markerPos = {
 			lat: loc.lat,
 			lng: loc.lng
@@ -63,78 +52,82 @@ function initMap(mapPos, dominos) {
 			});
 		});
 	}
+	function showReviews (place) {
+		console.log(place);
+		var $reviews, $review, $author, $authorName, $authorPhoto,
+		$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
+		reviewRating, $star, $starEmpty, $reviewStars;
 
-	createMap(mapPos);
-	//Create markers with drop animation
-	for (var i = 0; i < dominos.length; i++) {
-		iterator = 0;
-		window.setTimeout(function() {
-			createMarker(dominos);
-		}, i*400);
-	}
-}
+		$reviews = $(".reviews");
+		$reviews.empty();
 
-function showReviews (place) {
-	console.log(place);
-	var $review, $author, $authorName, $authorPhoto,
-	$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
-	reviewRating, $star, $starEmpty, $reviewStars;
-
-	var $reviews = $(".reviews");
-	$reviews.empty();
-
-	for (var i = 0; i < place.reviews.length; i++) {
-		$review = $("<div class='review'></div>");
-		//Author info
-		$author = $("<div class='author'></div>");
-		$authorName = $("<p class='author-name'>" + place.reviews[i].author_name + "</p>");
-		$authorPhoto = $("<img class='author-photo' src=" + place.reviews[i].profile_photo_url + "></img>");
-		$author.append([$authorPhoto, $authorName]);
-		//Star ratings
-		reviewRating = place.reviews[i].rating;
-		$reviewStars = $("<div class='review-stars'></div>");
-		//Create bootstrap star icons
-		for (var j = 0; j < place.reviews.length; j++) {
-			if (j < reviewRating) {
-				$star = $("<span class='glyphicon glyphicon-star' aria-hidden='true'></span>");
-				$reviewStars.append($star);
-			} else {
-				$starEmpty = $("<span class='glyphicon glyphicon-star-empty' aria-hidden='true'></span>");
-				$reviewStars.append($starEmpty);
+		for (var i = 0; i < place.reviews.length; i++) {
+			$review = $("<div class='review'></div>");
+			//Author info
+			$author = $("<div class='author'></div>");
+			$authorName = $("<p class='author-name'>" + place.reviews[i].author_name + "</p>");
+			$authorPhoto = $("<img class='author-photo' src=" + place.reviews[i].profile_photo_url + "></img>");
+			$author.append([$authorPhoto, $authorName]);
+			//Star ratings
+			reviewRating = place.reviews[i].rating;
+			$reviewStars = $("<div class='review-stars'></div>");
+			//Create bootstrap star icons
+			for (var j = 0; j < place.reviews.length; j++) {
+				if (j < reviewRating) {
+					$star = $("<span class='glyphicon glyphicon-star' aria-hidden='true'></span>");
+					$reviewStars.append($star);
+				} else {
+					$starEmpty = $("<span class='glyphicon glyphicon-star-empty' aria-hidden='true'></span>");
+					$reviewStars.append($starEmpty);
+				}
 			}
+			$reviewDate = $("<p class='review-date'>" + place.reviews[i].relative_time_description + "</p>");
+			//Shorten visible text and add button to expand
+			if (place.reviews[i].text.length > 230) {
+				shortText = place.reviews[i].text.substr(0, 230) + "...";
+				$readMore = $("<a href=" + i + "> read more</a>");
+				$reviewText = $("<p class='review-text'>" + shortText + "</p>").append($readMore);
+			} else {
+				$reviewText = $("<p class='review-text'>" + place.reviews[i].text + "</p>");
+			}
+			//Put review components to one array
+			$reviewItems = [$author, $reviewDate, $reviewStars, $reviewText];
+			$review.append($reviewItems).appendTo($reviews);
 		}
-		$reviewDate = $("<p class='review-date'>" + place.reviews[i].relative_time_description + "</p>");
-		//Shorten visible text and add button to expand
-		if (place.reviews[i].text.length > 230) {
-			shortText = place.reviews[i].text.substr(0, 230) + "...";
-			$readMore = $("<a href=" + i + "> read more</a>");
-			$reviewText = $("<p class='review-text'>" + shortText + "</p>").append($readMore);
-		} else {
-			$reviewText = $("<p class='review-text'>" + place.reviews[i].text + "</p>");
+		//Expand text by clicking on the button
+		$(".review-text a").on("click", function(e) {
+			e.preventDefault();
+			var $this = $(this);
+			var i = $(this).attr("href");
+			shortText = place.reviews[i].text;
+			$this.parent().text(shortText);
+		});
+	}
+	function showInfoWindow (place, marker) {
+		var contentText = "<p class='place-name'>" + place.name + "</p>" + "<p class='place-adress'>" + place.formatted_address + "</p>";
+		if (infoWindow) {
+			infoWindow.close();
 		}
-
-		//Put review components to one array
-		$reviewItems = [$author, $reviewDate, $reviewStars, $reviewText];
-		$review.append($reviewItems).appendTo($reviews);
+		infoWindow = new google.maps.InfoWindow({
+			content: contentText
+		});
+		infoWindow.open(map, marker);
 	}
-
-	//Expand text by clicking on the button
-	$(".review-text a").on("click", function(e) {
-		e.preventDefault();
-		var $this = $(this);
-		var i = $(this).attr("href");
-		shortText = place.reviews[i].text;
-		$this.parent().text(shortText);
+	//Get places info from json file
+	$.getJSON("js/places.json", function(data) {
+		var avgLat = 0,
+		avgLng = 0,
+		mapPos = 0;
+		//Set markers position
+		for (var i = 0; i < data.dominos.length; i++) {
+			avgLat += data.dominos[i].lat;
+			avgLng += data.dominos[i].lng;
+		}
+		//Set average position for center map
+		mapPos = {
+			lat: avgLat/data.dominos.length,
+			lng: avgLng/data.dominos.length
+		};
+		initMap(mapPos, data.dominos);
 	});
-}
-
-function showInfoWindow (place, marker) {
-	var contentText = "<p class='place-name'>" + place.name + "</p>" + "<p class='place-adress'>" + place.formatted_address + "</p>";
-	if (infoWindow) {
-		infoWindow.close();
-	}
-	infoWindow = new google.maps.InfoWindow({
-		content: contentText
-	});
-	infoWindow.open(map, marker);
-}
+});
