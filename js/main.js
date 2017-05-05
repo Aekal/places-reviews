@@ -1,4 +1,4 @@
-var map, service, infoWindow;
+var map, service, infoWindow, iterator;
 
 $(function() {
 	//Get places info from json file
@@ -40,18 +40,20 @@ function initMap(mapPos, dominos) {
 		});
 	}
 	function createMarker (data) {
-		var marker, markerPos, request;
+		var loc = data[iterator++];
+		var marker, markerPos, request, markerList = [];
 		markerPos = {
-			lat: data.lat,
-			lng: data.lng
+			lat: loc.lat,
+			lng: loc.lng
 		};
 		marker = new google.maps.Marker({
 			position: markerPos,
 			map: map,
+			animation: google.maps.Animation.DROP,
 			icon: "img/dominos-icon.png"
 		});
 		request = {
-			placeId: data.placeId
+			placeId: loc.placeId
 		};
 		marker.addListener("click", function() {
 			service = new google.maps.places.PlacesService(map);
@@ -61,9 +63,14 @@ function initMap(mapPos, dominos) {
 			});
 		});
 	}
+
 	createMap(mapPos);
+	//Create markers with drop animation
 	for (var i = 0; i < dominos.length; i++) {
-		createMarker(dominos[i]);
+		iterator = 0;
+		window.setTimeout(function() {
+			createMarker(dominos);
+		}, i*400);
 	}
 }
 
