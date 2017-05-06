@@ -1,12 +1,18 @@
 $(function() {
-	var map, service, infoWindow, iterator;
-	function initMap(mapPos, dominos) {
-		createMap(mapPos);
+	var map, service, infoWindow, iterator, markers = [], json, timer,
+	$dLabel = $("#dLabel"),
+	$reviews = $(".reviews");
+	function initMap(path) {
+		if (!map) {
+			createMap(getCenterPos(path));
+		}
+		timer = 0;
+		clearTimeout(timer);
 		//Create markers with drop animation
-		for (var i = 0; i < dominos.length; i++) {
-			iterator = 0;
-			window.setTimeout(function() {
-				createMarker(dominos);
+		iterator = 0;
+		for (var i = 0; i < path.length; i++) {
+			timer = setTimeout(function() {
+				createMarker(path);
 			}, i*400);
 		}
 	}
@@ -29,8 +35,9 @@ $(function() {
 		});
 	}
 	function createMarker (data) {
-		var marker, markerPos, request, markerList = [], loc;
+		var marker, markerPos, request, loc, image;
 		loc = data[iterator++];
+		image = "img/dominos-icon.png";
 		markerPos = {
 			lat: loc.lat,
 			lng: loc.lng
@@ -39,7 +46,7 @@ $(function() {
 			position: markerPos,
 			map: map,
 			animation: google.maps.Animation.DROP,
-			icon: "img/dominos-icon.png"
+			icon: image
 		});
 		request = {
 			placeId: loc.placeId
@@ -51,14 +58,13 @@ $(function() {
 				showReviews(place);
 			});
 		});
+		markers.push(marker);
 	}
 	function showReviews (place) {
-		console.log(place);
-		var $reviews, $review, $author, $authorName, $authorPhoto,
+		var $review, $author, $authorName, $authorPhoto,
 		$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
 		reviewRating, $star, $starEmpty, $reviewStars;
 
-		$reviews = $(".reviews");
 		$reviews.empty();
 
 		for (var i = 0; i < place.reviews.length; i++) {
@@ -113,21 +119,43 @@ $(function() {
 		});
 		infoWindow.open(map, marker);
 	}
+	function getCenterPos(path) {
+		var avgLat = 0, avgLng = 0, mapPos;
+		for (var i = 0; i < path.length; i++) {
+			avgLat += path[i].lat;
+			avgLng += path[i].lng;
+		}
+		mapPos = {
+			lat: avgLat/path.length,
+			lng: avgLng/path.length
+		};
+		return mapPos;
+	}
+	function changeMap(selectedPlace) {
+		//Center map in new location
+		var path = eval("json." + selectedPlace);
+		map.setCenter(getCenterPos(path));
+		//Remove old markers
+		for (var i = 0; i < markers.length; i++) {
+			markers[i].setMap(null);
+		}
+		initMap(path);
+		$reviews.empty().text("Click on marker to show clients reviews!");
+	}
 	//Get places info from json file
 	$.getJSON("js/places.json", function(data) {
-		var avgLat = 0,
-		avgLng = 0,
-		mapPos = 0;
-		//Set markers position
-		for (var i = 0; i < data.dominos.length; i++) {
-			avgLat += data.dominos[i].lat;
-			avgLng += data.dominos[i].lng;
-		}
-		//Set average position for center map
-		mapPos = {
-			lat: avgLat/data.dominos.length,
-			lng: avgLng/data.dominos.length
-		};
-		initMap(mapPos, data.dominos);
+		json = data;
+		initMap(data.dominos);
+	});
+	$(".dropdown-menu").on("click", "a", function(e) {
+		e.preventDefault();
+		var selectedPlace, placeName, $this = $(this);
+		//Remove '#' from href
+		selectedPlace = $this.attr("href").slice(1);
+		//Set button text to selected option
+		placeName = $this.text();
+		$dLabel.text(placeName);
+		$dLabel.append(" <span class='caret'></span>");
+		changeMap(selectedPlace);
 	});
 });
