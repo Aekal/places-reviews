@@ -42,6 +42,18 @@
 		border: 4px solid #d2dd94;
 	}
 
+	.scroll-btn {
+		margin-top: 10px;
+		display: block;
+		margin: 0 auto;
+		text-align: center;
+		background-color: #ffffff;
+		text-decoration: none;
+
+		span {
+			color: #275381;
+		}
+	}
 }
 
 @keyframes rotate {
@@ -70,6 +82,11 @@
 		overflow: visible;
 	}
 
+	@media (max-width: 1000px) {
+		margin: 10px;
+		max-height: none;
+	}
+
 	.review {
 		margin: 10px 0;
 		border-bottom: 1px dashed #a2a2a2;
@@ -77,37 +94,33 @@
 		&:last-child {
 			border: 0;
 		}
-	}
 
-	.author {
-		position: relative;
-	}
+		.author {
+			position: relative;
+		}
 
-	.author-name {
-		font-size: 16px;
-		width: 100%;
-		text-align: center;
-		position: absolute;
-		top: 7px;
-	}
+		.author-name {
+			font-size: 16px;
+			width: 100%;
+			text-align: center;
+			position: absolute;
+			top: 7px;
+		}
 
-	.author-photo {
-		width: 40px;
-		height: 40px;
-		margin-left: 5px;
-	}
+		.author-photo {
+			width: 40px;
+			height: 40px;
+			margin-left: 5px;
+		}
 
-	.review-date {
-		margin-bottom: 2px;
-		color: #a4a4a4;
-		text-align: center;
-	}
+		.review-date {
+			margin-bottom: 2px;
+			color: #a4a4a4;
+			text-align: center;
+		}
 
-	.review-text {
-
-	}
-
-	.review-stars {
-		text-align: center;
+		.review-stars {
+			text-align: center;
+		}
 	}
 }

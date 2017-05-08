@@ -56,8 +56,8 @@ $(function() {
 		request = {
 			placeId: loc.placeId
 		};
+		service = new google.maps.places.PlacesService(map);
 		marker.addListener("click", function() {
-			service = new google.maps.places.PlacesService(map);
 			service.getDetails(request, function(place, status) {
 				showInfoWindow(place, marker);
 				showReviews(place);
@@ -70,7 +70,7 @@ $(function() {
 		photosCount = 0, $reviewMask, $reviewLoader,
 		$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
 		reviewRating, $star, $starEmpty, $reviewStars;
-
+		console.log(place);
 		$reviews.empty();
 		$reviews.addClass("animate");
 		//Loader animation
@@ -132,6 +132,9 @@ $(function() {
 	}
 	function showInfoWindow (place, marker) {
 		var contentText = "<p class='place-name'>" + place.name + "</p>" + "<p class='place-adress'>" + place.formatted_address + "</p>";
+		if ($(window).width() < 1000) {
+			contentText += "<a href='#reviews' class='scroll-btn'>Scroll to reviews <span class='glyphicon glyphicon-circle-arrow-down'></span></a>";
+		}
 		if (infoWindow) {
 			infoWindow.close();
 		}
@@ -157,6 +160,7 @@ $(function() {
 		var path = eval("json." + selectedPlace);
 		iconImg = "img/" + selectedPlace + "-icon.png";
 		map.setCenter(getCenterPos(path));
+		map.setZoom(5);
 		//Remove old markers
 		for (var i = 0; i < markers.length; i++) {
 			markers[i].setMap(null);
