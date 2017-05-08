@@ -25,5 +25,27 @@
       "lng": -78.4657288,
       "placeId": "ChIJhVQx4nqyrYkRVHeXy8CbcmY"
     }
+  ],
+  "cinemark" : [
+    {
+      "lat": 34.6080626,
+      "lng": -118.155899,
+      "placeId": "ChIJ97INUJxZwoAR2nyLPBaO8yM"
+    },
+    {
+      "lat": 37.8965304,
+      "lng": -122.0622253,
+      "placeId": "ChIJO8sbDOphhYARVa8Vge9SfdA"
+    },
+    {
+      "lat": 35.1816657,
+      "lng": -106.6676331,
+      "placeId": "ChIJ6R_8kNZzIocRxglyUve8EVw"
+    },
+    {
+      "lat": 40.2166355,
+      "lng": -111.6622925,
+      "placeId": "ChIJMyQScF6XTYcRjkPSCgig3ps"
+    }
   ]
 }
