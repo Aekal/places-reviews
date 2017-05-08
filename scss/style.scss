@@ -2,8 +2,51 @@
 	margin-bottom: 10px;
 }
 
-.map {
-	height: 400px;
+.mask {
+	display: none;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+	position: absolute;
+	background-color: inherit;
+	top: 0;
+	left: 0;
+
+	&.visible {
+		display: block;
+	}
+
+	.loader {
+		width: 80px;
+		height: 80px;
+		border: 8px solid #eeeeee;
+		border-top: 8px solid #41cceb;
+		border-radius: 50%;
+		animation: rotate 1.5s infinite linear;
+		position: absolute;
+		z-index: 100;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		margin: auto;
+	}
+}
+
+.map-container {
+	position: relative;
+	background-color: #d4d4d4;
+
+	.map {
+		height: 400px;
+		border: 4px solid #d2dd94;
+	}
+
+}
+
+@keyframes rotate {
+	0% {transform: rotate(0deg);}
+	100% {transform: rotate(360deg);}
 }
 
 .place-name {
@@ -15,11 +58,17 @@
 }
 
 .reviews {
+	background-color: #ffffff;
 	box-shadow: 2px 2px 20px #888888;
 	border-radius: 10px;
 	padding: 10px;
 	max-height: 80vh;
 	overflow-x: hidden;
+
+	&.animate {
+		height: 200px;
+		overflow: visible;
+	}
 
 	.review {
 		margin: 10px 0;

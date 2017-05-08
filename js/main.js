@@ -1,18 +1,22 @@
 $(function() {
 	var map, service, infoWindow, iterator, markers = [], json,
+	loaded = false,
 	iconImg = "img/dominos-icon.png",
+	$mapMask = $(".map-container").find(".mask");
 	$dLabel = $("#dLabel"),
 	$reviews = $(".reviews");
 	function initMap(path) {
 		if (!map) {
-			createMap(getCenterPos(path));
+			createMap(path);
 		}
-		iterator = 0;
-		for (var i = 0; i < path.length; i++) {
-			createMarker(path);
+		if (loaded === true) {
+			iterator = 0;
+			for (var i = 0; i < path.length; i++) {
+				createMarker(path);
+			}
 		}
 	}
-	function createMap (mapPos) {
+	function createMap (path) {
 		var styles = [
 			{
 				featureType: "road",
@@ -24,10 +28,15 @@ $(function() {
 			}
 		];
 		map = new google.maps.Map(document.getElementById("map"), {
-			center: mapPos,
+			center: getCenterPos(path),
 			zoom: 5,
 			disableDefaultUI: true,
 			styles: styles
+		});
+		google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
+			loaded = true;
+			initMap(path);
+			$mapMask.removeClass("visible");
 		});
 	}
 	function createMarker (data) {
@@ -57,11 +66,17 @@ $(function() {
 		markers.push(marker);
 	}
 	function showReviews (place) {
-		var $review, $author, $authorName, $authorPhoto,
+		var $review, $reviewCache = [], $author, $authorName, $authorPhoto,
+		photosCount = 0, $reviewMask, $reviewLoader,
 		$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
 		reviewRating, $star, $starEmpty, $reviewStars;
 
 		$reviews.empty();
+		$reviews.addClass("animate");
+		//Loader animation
+		$reviewMask = $("<div class='mask visible'></div>");
+		$reviewLoader = $("<div class='loader'></div>");
+		$reviewMask.append($reviewLoader).appendTo($reviews);
 
 		for (var i = 0; i < place.reviews.length; i++) {
 			$review = $("<div class='review'></div>");
@@ -88,22 +103,32 @@ $(function() {
 			if (place.reviews[i].text.length > 230) {
 				shortText = place.reviews[i].text.substr(0, 230) + "...";
 				$readMore = $("<a href=" + i + "> read more</a>");
+				//Expand text by clicking on the button
+				$readMore.on("click", function(e) {
+					e.preventDefault();
+					var $this = $(this);
+					var i = $(this).attr("href");
+					shortText = place.reviews[i].text;
+					$this.parent().text(shortText);
+				});
 				$reviewText = $("<p class='review-text'>" + shortText + "</p>").append($readMore);
 			} else {
 				$reviewText = $("<p class='review-text'>" + place.reviews[i].text + "</p>");
 			}
 			//Put review components to one array
 			$reviewItems = [$author, $reviewDate, $reviewStars, $reviewText];
-			$review.append($reviewItems).appendTo($reviews);
+			$review.append($reviewItems);
+			//Loader
+			$reviewCache.push($review);
+			$authorPhoto.on("load", function() {
+				photosCount++;
+				if (photosCount === place.reviews.length) {
+					$reviews.removeClass("animate");
+					$reviews.append($reviewCache);
+					$reviewMask.removeClass("visible");
+				}
+			});
 		}
-		//Expand text by clicking on the button
-		$(".review-text a").on("click", function(e) {
-			e.preventDefault();
-			var $this = $(this);
-			var i = $(this).attr("href");
-			shortText = place.reviews[i].text;
-			$this.parent().text(shortText);
-		});
 	}
 	function showInfoWindow (place, marker) {
 		var contentText = "<p class='place-name'>" + place.name + "</p>" + "<p class='place-adress'>" + place.formatted_address + "</p>";
