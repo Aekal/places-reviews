@@ -1,15 +1,15 @@
 $(function() {
 	var map, service, infoWindow, iterator, markers = [], json,
-	loaded = false,
+	mapLoaded = false,
 	iconImg = "img/dominos-icon.png",
-	$mapMask = $(".map-container").find(".mask");
+	$mapMask = $(".map-container").find(".mask"),
 	$dLabel = $("#dLabel"),
-	$reviews = $(".reviews");
+	$reviews = $("#reviews");
 	function initMap(path) {
 		if (!map) {
 			createMap(path);
 		}
-		if (loaded === true) {
+		if (mapLoaded === true) {
 			iterator = 0;
 			for (var i = 0; i < path.length; i++) {
 				createMarker(path);
@@ -29,12 +29,12 @@ $(function() {
 		];
 		map = new google.maps.Map(document.getElementById("map"), {
 			center: getCenterPos(path),
-			zoom: 5,
+			zoom: getScale(path),
 			disableDefaultUI: true,
 			styles: styles
 		});
 		google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-			loaded = true;
+			mapLoaded = true;
 			initMap(path);
 			$mapMask.removeClass("visible");
 		});
@@ -70,14 +70,13 @@ $(function() {
 		photosCount = 0, $reviewMask, $reviewLoader,
 		$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
 		reviewRating, $star, $starEmpty, $reviewStars;
-		console.log(place);
 		$reviews.empty();
 		$reviews.addClass("animate");
 		//Loader animation
 		$reviewMask = $("<div class='mask visible'></div>");
 		$reviewLoader = $("<div class='loader'></div>");
 		$reviewMask.append($reviewLoader).appendTo($reviews);
-
+		//Create review components
 		for (var i = 0; i < place.reviews.length; i++) {
 			$review = $("<div class='review'></div>");
 			//Author info
@@ -155,12 +154,43 @@ $(function() {
 		};
 		return mapPos;
 	}
+	function getScale(path) {
+		var scale = 5;
+		if ($(window).width() < 500) {
+			var maxLat = 0, maxLng = 0, minLng, minLat, maxDifference = 0;
+			minLat = Math.abs(path[0].lat);
+			minLng = Math.abs(path[0].lng);
+			for (var i = 0; i < path.length; i++) {
+				if (minLat > Math.abs(path[i].lat)) {
+					minLat = Math.abs(path[i].lat);
+				}
+				if (maxLat < Math.abs(path[i].lat)) {
+					maxLat = Math.abs(path[i].lat);
+				}
+				if (minLng > Math.abs(path[i].lng)) {
+					minLng = Math.abs(path[i].lng);
+				}
+				if (maxLng < Math.abs(path[i].lng)) {
+					maxLng = Math.abs(path[i].lng);
+				}
+			}
+			if ((maxLat - minLat) > (maxLng - minLng)) {
+				maxDifference = maxLat - minLat;
+			} else {
+				maxDifference = maxLng - minLng;
+			}
+			if (maxDifference > 10) {
+				scale = 4;
+			}
+		}
+		return scale;
+	}
 	function changeMap(selectedPlace) {
 		//Center map in new location
 		var path = eval("json." + selectedPlace);
 		iconImg = "img/" + selectedPlace + "-icon.png";
 		map.setCenter(getCenterPos(path));
-		map.setZoom(5);
+		map.setZoom(getScale(path));
 		//Remove old markers
 		for (var i = 0; i < markers.length; i++) {
 			markers[i].setMap(null);
