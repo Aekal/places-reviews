@@ -1,19 +1,15 @@
 $(function() {
-	var map, service, infoWindow, iterator, markers = [], json, timer,
+	var map, service, infoWindow, iterator, markers = [], json,
+	iconImg = "img/dominos-icon.png",
 	$dLabel = $("#dLabel"),
 	$reviews = $(".reviews");
 	function initMap(path) {
 		if (!map) {
 			createMap(getCenterPos(path));
 		}
-		timer = 0;
-		clearTimeout(timer);
-		//Create markers with drop animation
 		iterator = 0;
 		for (var i = 0; i < path.length; i++) {
-			timer = setTimeout(function() {
-				createMarker(path);
-			}, i*400);
+			createMarker(path);
 		}
 	}
 	function createMap (mapPos) {
@@ -46,7 +42,7 @@ $(function() {
 			position: markerPos,
 			map: map,
 			animation: google.maps.Animation.DROP,
-			icon: image
+			icon: iconImg
 		});
 		request = {
 			placeId: loc.placeId
@@ -134,6 +130,7 @@ $(function() {
 	function changeMap(selectedPlace) {
 		//Center map in new location
 		var path = eval("json." + selectedPlace);
+		iconImg = "img/" + selectedPlace + "-icon.png";
 		map.setCenter(getCenterPos(path));
 		//Remove old markers
 		for (var i = 0; i < markers.length; i++) {
