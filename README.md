@@ -2,6 +2,7 @@
 ![Places reviews app image](http://fialkiewicz.pl/img/projects/places-reviews.jpg)
 
 Responsive app to generate Google reviews, based on the selected places.
+
 The information about places is in a json file.
 
 ### Technologies used:
