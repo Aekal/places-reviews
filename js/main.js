@@ -131,9 +131,7 @@ $(function() {
 	}
 	function showInfoWindow (place, marker) {
 		var contentText = "<p class='place-name'>" + place.name + "</p>" + "<p class='place-adress'>" + place.formatted_address + "</p>";
-		if ($(window).width() < 1000) {
-			contentText += "<a href='#reviews' class='scroll-btn'>Scroll to reviews <span class='glyphicon glyphicon-circle-arrow-down'></span></a>";
-		}
+		contentText += "<a href='#reviews' class='scroll-btn visible-sm visible-xs'>Scroll to reviews <span class='glyphicon glyphicon-circle-arrow-down'></span></a>";
 		if (infoWindow) {
 			infoWindow.close();
 		}

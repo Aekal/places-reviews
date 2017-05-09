@@ -76,7 +76,7 @@
   .reviews.animate {
     height: 200px;
     overflow: visible; }
-  @media (max-width: 1000px) {
+  @media (max-width: 991px) {
     .reviews {
       margin: 10px;
       max-height: none; } }
