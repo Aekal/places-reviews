@@ -47,5 +47,32 @@
       "lng": -111.6622925,
       "placeId": "ChIJMyQScF6XTYcRjkPSCgig3ps"
     }
+  ],
+  "hotels" : [
+    {
+      "lat": 43.4210088,
+      "lng": -103.4802246,
+      "placeId": "ChIJEzUi27nNfIcRNG-oRpmNKp0"
+    },
+    {
+      "lat": 38.5975538,
+      "lng": -109.5721436,
+      "placeId": "ChIJp1fgpdbhR4cRfDQokVceueY"
+    },
+    {
+      "lat": 37.2696815,
+      "lng": -107.8912354,
+      "placeId": "ChIJ-15Uh5sCPIcR4vq0-TFVEzw"
+    },
+    {
+      "lat": 42.0101472,
+      "lng": -87.8875351,
+      "placeId": "ChIJSTtljFC2D4gRUybu3rlwqRs"
+    },
+    {
+      "lat": 44.9706276,
+      "lng": -93.2766724,
+      "placeId": "ChIJRdv0N74ys1IRwVqH89kLSuk"
+    }
   ]
 }
