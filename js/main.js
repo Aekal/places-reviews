@@ -185,7 +185,7 @@ $(function() {
 	}
 	function changeMap(selectedPlace) {
 		//Center map in new location
-		var path = eval("json." + selectedPlace);
+		var path = json[selectedPlace];
 		iconImg = "img/" + selectedPlace + "-icon.png";
 		map.setCenter(getCenterPos(path));
 		map.setZoom(getScale(path));
