@@ -1,22 +1,21 @@
 $(function() {
-	var map, service, infoWindow, iterator, markers = [], json,
-	mapLoaded = false,
-	iconImg = "img/dominos-icon.png",
-	$mapMask = $(".map-container").find(".mask"),
-	$dLabel = $("#dLabel"),
-	$reviews = $("#reviews");
-	function initMap(path) {
+	var map, mapLoaded = false, service, infoWindow, markers = [], json,
+			iconImg = "img/dominos-icon.png",
+			$mapMask = $(".map-container").find(".mask"),
+			$dLabel = $("#dLabel"),
+			$reviews = $("#reviews");
+	function initMap(places) {
+		var i = 0;
 		if (!map) {
-			createMap(path);
+			createMap(places);
 		}
 		if (mapLoaded === true) {
-			iterator = 0;
-			for (var i = 0; i < path.length; i++) {
-				createMarker(path);
+			for (i = 0; i < places.length; i++) {
+				createMarker(places, i);
 			}
 		}
 	}
-	function createMap (path) {
+	function createMap (places) {
 		var styles = [
 			{
 				featureType: "road",
@@ -28,34 +27,32 @@ $(function() {
 			}
 		];
 		map = new google.maps.Map(document.getElementById("map"), {
-			center: getCenterPos(path),
-			zoom: getScale(path),
+			center: getCenterPos(places),
+			zoom: getScale(places),
 			disableDefaultUI: true,
 			styles: styles
 		});
 		google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
 			mapLoaded = true;
-			initMap(path);
+			initMap(places);
 			$mapMask.removeClass("visible");
 		});
 	}
-	function createMarker (data) {
-		var marker, markerPos, request, loc, image;
-		loc = data[iterator++];
-		image = "img/dominos-icon.png";
-		markerPos = {
-			lat: loc.lat,
-			lng: loc.lng
-		};
-		marker = new google.maps.Marker({
-			position: markerPos,
-			map: map,
-			animation: google.maps.Animation.DROP,
-			icon: iconImg
-		});
-		request = {
-			placeId: loc.placeId
-		};
+	function createMarker (data, iterator) {
+		var currentPlace = data[iterator++],
+				markerPos = {
+					lat: currentPlace.lat,
+					lng: currentPlace.lng
+				},
+				marker = new google.maps.Marker({
+					position: markerPos,
+					map: map,
+					animation: google.maps.Animation.DROP,
+					icon: iconImg
+				}),
+				request = {
+					placeId: currentPlace.placeId
+				};
 		service = new google.maps.places.PlacesService(map);
 		marker.addListener("click", function() {
 			service.getDetails(request, function(place, status) {
@@ -66,18 +63,20 @@ $(function() {
 		markers.push(marker);
 	}
 	function showReviews (place) {
-		var $review, $reviewCache = [], $author, $authorName, $authorPhoto,
-		photosCount = 0, $reviewMask, $reviewLoader,
-		$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
-		reviewRating, $star, $starEmpty, $reviewStars;
-		$reviews.empty();
-		$reviews.addClass("animate");
-		//Loader animation
-		$reviewMask = $("<div class='mask visible'></div>");
-		$reviewLoader = $("<div class='loader'></div>");
+		var $review, $reviewCache = [],
+				$author, $authorName, $authorPhoto,
+				$reviewDate, $reviewText, shortText, $readMore, $reviewItems,
+				reviewRating, $star, $starEmpty, $reviewStars,
+				//Loader animation
+				$reviewMask = $("<div class='mask visible'></div>"),
+				$reviewLoader = $("<div class='loader'></div>"),
+				i = 0,
+				j = 0,
+				photosLoaded = 0;
+		$reviews.empty().addClass("animate");
 		$reviewMask.append($reviewLoader).appendTo($reviews);
 		//Create review components
-		for (var i = 0; i < place.reviews.length; i++) {
+		for (i = 0; i < place.reviews.length; i++) {
 			$review = $("<div class='review'></div>");
 			//Author info
 			$author = $("<div class='author'></div>");
@@ -88,7 +87,7 @@ $(function() {
 			reviewRating = place.reviews[i].rating;
 			$reviewStars = $("<div class='review-stars'></div>");
 			//Create bootstrap star icons
-			for (var j = 0; j < place.reviews.length; j++) {
+			for (j = 0; j < place.reviews.length; j++) {
 				if (j < reviewRating) {
 					$star = $("<span class='glyphicon glyphicon-star' aria-hidden='true'></span>");
 					$reviewStars.append($star);
@@ -104,9 +103,9 @@ $(function() {
 				$readMore = $("<a href=" + i + "> read more</a>");
 				//Expand text by clicking on the button
 				$readMore.on("click", function(e) {
+					var $this = $(this),
+							i = $this.attr("href");
 					e.preventDefault();
-					var $this = $(this);
-					var i = $(this).attr("href");
 					shortText = place.reviews[i].text;
 					$this.parent().text(shortText);
 				});
@@ -120,10 +119,9 @@ $(function() {
 			//Loader
 			$reviewCache.push($review);
 			$authorPhoto.on("load", function() {
-				photosCount++;
-				if (photosCount === place.reviews.length) {
-					$reviews.removeClass("animate");
-					$reviews.append($reviewCache);
+				photosLoaded++;
+				if (photosLoaded === place.reviews.length) {
+					$reviews.removeClass("animate").append($reviewCache);
 					$reviewMask.removeClass("visible");
 				}
 			});
@@ -140,36 +138,39 @@ $(function() {
 		});
 		infoWindow.open(map, marker);
 	}
-	function getCenterPos(path) {
-		var avgLat = 0, avgLng = 0, mapPos;
-		for (var i = 0; i < path.length; i++) {
-			avgLat += path[i].lat;
-			avgLng += path[i].lng;
+	function getCenterPos(places) {
+		var i = 0, avgLat = 0, avgLng = 0, mapPos;
+		for (i = 0; i < places.length; i++) {
+			avgLat += places[i].lat;
+			avgLng += places[i].lng;
 		}
 		mapPos = {
-			lat: avgLat/path.length,
-			lng: avgLng/path.length
+			lat: avgLat/places.length,
+			lng: avgLng/places.length
 		};
 		return mapPos;
 	}
-	function getScale(path) {
-		var scale = 5;
+	function getScale(places) {
+		var i = 0,
+				maxLat = 0,
+				maxLng = 0,
+				maxDifference = 0,
+				minLat = Math.abs(places[0].lat),
+				minLng = Math.abs(places[0].lng),
+				scale = 5;
 		if ($(window).width() < 500) {
-			var maxLat = 0, maxLng = 0, minLng, minLat, maxDifference = 0;
-			minLat = Math.abs(path[0].lat);
-			minLng = Math.abs(path[0].lng);
-			for (var i = 0; i < path.length; i++) {
-				if (minLat > Math.abs(path[i].lat)) {
-					minLat = Math.abs(path[i].lat);
+			for (i = 0; i < places.length; i++) {
+				if (minLat > Math.abs(places[i].lat)) {
+					minLat = Math.abs(places[i].lat);
 				}
-				if (maxLat < Math.abs(path[i].lat)) {
-					maxLat = Math.abs(path[i].lat);
+				if (maxLat < Math.abs(places[i].lat)) {
+					maxLat = Math.abs(places[i].lat);
 				}
-				if (minLng > Math.abs(path[i].lng)) {
-					minLng = Math.abs(path[i].lng);
+				if (minLng > Math.abs(places[i].lng)) {
+					minLng = Math.abs(places[i].lng);
 				}
-				if (maxLng < Math.abs(path[i].lng)) {
-					maxLng = Math.abs(path[i].lng);
+				if (maxLng < Math.abs(places[i].lng)) {
+					maxLng = Math.abs(places[i].lng);
 				}
 			}
 			if ((maxLat - minLat) > (maxLng - minLng)) {
@@ -185,12 +186,13 @@ $(function() {
 	}
 	function changeMap(selectedPlace) {
 		//Center map in new location
-		var path = json[selectedPlace];
+		var path = json[selectedPlace],
+				i = 0;
 		iconImg = "img/" + selectedPlace + "-icon.png";
 		map.setCenter(getCenterPos(path));
 		map.setZoom(getScale(path));
 		//Remove old markers
-		for (var i = 0; i < markers.length; i++) {
+		for (i = 0; i < markers.length; i++) {
 			markers[i].setMap(null);
 		}
 		initMap(path);
@@ -203,13 +205,11 @@ $(function() {
 	});
 	$(".dropdown-menu").on("click", "a", function(e) {
 		e.preventDefault();
-		var selectedPlace, placeName, $this = $(this);
-		//Remove '#' from href
-		selectedPlace = $this.attr("href").slice(1);
+		var $this = $(this),
+				selectedPlace = $this.attr("href").slice(1),
+				placeName = $this.text();
 		//Set button text to selected option
-		placeName = $this.text();
-		$dLabel.text(placeName);
-		$dLabel.append(" <span class='caret'></span>");
+		$dLabel.text(placeName).append(" <span class='caret'></span>");
 		changeMap(selectedPlace);
 	});
 });
