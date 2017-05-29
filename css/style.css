@@ -103,3 +103,19 @@
       text-align: center; }
     .reviews .review .review-stars {
       text-align: center; }
+
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #f1f1f1; }
+  @media (max-width: 991px) {
+    footer {
+      display: none; } }
+  footer p {
+    margin: 0;
+    padding: 5px;
+    text-align: center; }
+  footer .author-url {
+    text-decoration: underline;
+    color: #000000; }
