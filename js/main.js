@@ -73,8 +73,22 @@ $(function() {
 				i = 0,
 				j = 0,
 				photosLoaded = 0;
-		$reviews.empty().addClass("animate");
-		$reviewMask.append($reviewLoader).appendTo($reviews);
+				$reviews.empty().addClass("animate");
+				$reviewMask.append($reviewLoader).appendTo($reviews);
+		function loadPhotos() {
+			photosLoaded++;
+			if (photosLoaded === place.reviews.length) {
+				$reviews.removeClass("animate").append($reviewCache);
+				$reviewMask.removeClass("visible");
+			}
+		}
+		function expandText(e) {
+			var $this = $(this),
+			i = $this.attr("href");
+			e.preventDefault();
+			shortText = place.reviews[i].text;
+			$this.parent().text(shortText);
+		}
 		//Create review components
 		for (i = 0; i < place.reviews.length; i++) {
 			$review = $("<div class='review'></div>");
@@ -102,13 +116,7 @@ $(function() {
 				shortText = place.reviews[i].text.substr(0, 230) + "...";
 				$readMore = $("<a href=" + i + "> read more</a>");
 				//Expand text by clicking on the button
-				$readMore.on("click", function(e) {
-					var $this = $(this),
-							i = $this.attr("href");
-					e.preventDefault();
-					shortText = place.reviews[i].text;
-					$this.parent().text(shortText);
-				});
+				$readMore.on("click", expandText);
 				$reviewText = $("<p class='review-text'>" + shortText + "</p>").append($readMore);
 			} else {
 				$reviewText = $("<p class='review-text'>" + place.reviews[i].text + "</p>");
@@ -118,13 +126,7 @@ $(function() {
 			$review.append($reviewItems);
 			//Loader
 			$reviewCache.push($review);
-			$authorPhoto.on("load", function() {
-				photosLoaded++;
-				if (photosLoaded === place.reviews.length) {
-					$reviews.removeClass("animate").append($reviewCache);
-					$reviewMask.removeClass("visible");
-				}
-			});
+			$authorPhoto.on("load", loadPhotos);
 		}
 	}
 	function showInfoWindow (place, marker) {
